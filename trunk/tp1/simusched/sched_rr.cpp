@@ -21,6 +21,7 @@ void SchedRR::unblock(int pid) {
   
 	for ( it= bloqueados.begin() ; it < bloqueados.end(); it++ ){
 		if(*it == pid){
+			cout << "Hola" << *it<<endl;
 			bloqueados.erase(it);
 			break;
 		}
@@ -29,58 +30,25 @@ void SchedRR::unblock(int pid) {
 }
 
 int SchedRR::tick(const enum Motivo m) {  	
-	int tamCola;
 	switch(m){
-	case EXIT:
-		// Si el pid actual terminó, sigue el próximo.
-		if (q.empty()) {return IDLE_TASK;}
-		else {		
-			contador = 0;			
-			tamCola = q.size();
-			for(int i = 0; i < tamCola;i++)
-				{
-						int sig = q.front(); q.pop();
-						if(NoEstaBloqueado(sig))
-							{								
-								return sig;
-							}
-						else{
-							q.push(sig);
-						}
-							
-				}
-				return IDLE_TASK;
-		}
-	break;
-	case BLOCK:		
-			bloqueados.insert(bloqueados.begin(), current_pid());
-			contador = 0;
-			tamCola = q.size();
-				for(int i = 0; i < tamCola;i++)
-				{
-						int sig = q.front(); q.pop();
-						if(NoEstaBloqueado(sig))
-							{
-								q.push(current_pid());
-								return sig;
-							}
-						else{
-							q.push(sig);
-						}
-							
-				}
-				return IDLE_TASK;
-			
-	break;
-	case TICK:
-			// Tenemos que ver si se estaba ejecutando la IDLE o no...
+		case EXIT: return haceExit(m);		
+		case BLOCK: return haceBlock(m);		
+		case TICK: return haceTick(m);
+	}
+	
+}
+
+int SchedRR::haceTick(const enum Motivo m) {
+	// Tenemos que ver si se estaba ejecutando la IDLE o no...
 			if (current_pid() == IDLE_TASK)	// Caso que se estaba ejecutando la IDLE
 			{
 				//Si no tengo procesos devuelvo la idle ...
-				if (q.empty())	{return IDLE_TASK;}
+				if (q.empty())	{
+					return IDLE_TASK;
+				}
 				
 				//Si tengo procesos devuelvo alguno que no este bloqueado ...
-				tamCola = q.size();
+				int tamCola = q.size();
 				for(int i = 0; i < tamCola;i++)
 				{
 						int sig = q.front(); q.pop();
@@ -89,10 +57,8 @@ int SchedRR::tick(const enum Motivo m) {
 						}
 						else{
 							q.push(sig);
-						}
-							
+						}							
 				}
-				
 			}
 			else 
 			{
@@ -101,7 +67,7 @@ int SchedRR::tick(const enum Motivo m) {
 				{	
 					contador = 0;			// Reseteo el quantum				
 				
-					tamCola = q.size();
+					int tamCola = q.size();
 					for(int i = 0; i < tamCola;i++)
 					{
 							int sig = q.front(); q.pop();
@@ -119,10 +85,52 @@ int SchedRR::tick(const enum Motivo m) {
 				return current_pid();	
 			}		// Si no se alcanzo el quantum se sigue ejecutando el current
 	
-	break;
-	}
 }
 
+int SchedRR::haceExit(const enum Motivo m) {
+	// Si el pid actual terminó, sigue el próximo.
+		if (q.empty()) {
+			return IDLE_TASK;
+		} else {		
+			contador = 0;			
+			int tamCola = q.size();
+			for(int i = 0; i < tamCola;i++)
+				{
+						int sig = q.front(); q.pop();
+						if(NoEstaBloqueado(sig))
+							{								
+								return sig;
+						}else{
+							q.push(sig);
+						}
+							
+				}
+				return IDLE_TASK;
+		}
+}
+
+int SchedRR::haceBlock(const enum Motivo m) {
+	if(NoEstaBloqueado(current_pid())){
+				bloqueados.insert(bloqueados.begin(), current_pid());
+			}
+			contador = 0;
+			int tamCola = q.size();
+				for(int i = 0; i < tamCola;i++)
+				{
+						int sig = q.front(); q.pop();
+						if(NoEstaBloqueado(sig))
+							{
+								q.push(current_pid());
+								return sig;
+							}
+						else{
+							q.push(sig);
+						}
+							
+				}
+				return IDLE_TASK;
+			
+} 
 
 bool SchedRR::NoEstaBloqueado(int pid)
 {
