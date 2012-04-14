@@ -13,11 +13,11 @@ class SchedRR : public SchedBase {
 		virtual int tick(const enum Motivo m);
 	
 	private:
-		bool NoEstaBloqueado(int pid);
+		bool EstaBloqueado(int pid);
 		int haceTick(const enum Motivo m);
 		int haceBlock(const enum Motivo m);
 		int haceExit(const enum Motivo m);
-
+		int ProximoProcesoAEjecutar(bool pushearActual);
 		
 		int quantum;
 		std::queue<int> q;
