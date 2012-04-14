@@ -20,7 +20,7 @@ void SchedRR::unblock(int pid) {
 	//Para desbloquear recorro el vector de bloqueados con un iterador.
 	//Si lo encuentra lo borra, desbloqueandolo.
 	vector<int>::iterator it = bloqueados.begin();
-	for (int i = 0 ; i < bloqueados.size(); i++ ){
+	for (unsigned int i = 0 ; i < bloqueados.size(); i++ ){
 		if(*(it+i) == pid){
 			bloqueados.erase(it+i);
 			break;
