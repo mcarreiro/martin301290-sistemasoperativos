@@ -60,9 +60,9 @@ int SchedLottery::haceTick(){
 		int indiceGanador = sorteo(ticketGanador);
 		sacarTicketsDeMas(indiceGanador);
 		return q[indiceGanador].pid;
-	}else if (quantum != contador){ 					// Todavia no terminé sigo, en caso de que haya terminado el tiempo pero no la tarea y sea la 												última entra en el caso anterior y el sorteo lo gana el que está solo;
-		return current_pid();
-	}else{									// No tengo ni tareas 
+	}else if (quantum != contador){ 			// Todavia no terminé sigo, en caso de que haya terminado el tiempo pero no la tarea y sea la
+		return current_pid();				// última entra en el caso anterior y el sorteo lo gana el que está solo;
+	}else{							// No tengo ni tareas 
 		return IDLE_TASK;
 	}
 }
@@ -74,7 +74,7 @@ int SchedLottery::haceExit(){
 	if (ticketsTotal > 0) { //Quedan tareas en la cola de activas
 		int ticketGanador = random() % ticketsTotal;			// Consigo el ticket ganador
 		contador = 0; 							// Reseteo contador para el proximo
-		int indiceGanador = sorteo(ticketGanador);
+		int indiceGanador = sorteo(ticketGanador);			// Obtengo el proximo que tiene que correr
 		sacarTicketsDeMas(indiceGanador);
 		return q[indiceGanador].pid;
 	}else{
