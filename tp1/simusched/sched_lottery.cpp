@@ -113,7 +113,7 @@ int SchedLottery::sorteo(int ticketGanador){
 
 void SchedLottery::sacarTicketsDeMas(int indiceGanador){
 	if (q[indiceGanador].estado == SOBRAN_TICKETS){			// Si fue compensado hay que sacarle los que tiene de más
-			ticketsTotal = ticketsTotal - q[indiceGanador].tickets - 1;				
+			ticketsTotal = ticketsTotal - (q[indiceGanador].tickets - 1);				
 			q[indiceGanador].tickets = 1;
 	}
 }
