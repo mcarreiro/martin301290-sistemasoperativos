@@ -4,7 +4,7 @@
 import re, sys, os
 
 from PIL import Image, ImageDraw, ImageFont
-FONT_NAME = "/usr/share/fonts/truetype/ttf-lucida/LucidaSansDemiBold.ttf" ##"LucidaSansRegular.ttf"
+FONT_NAME = "/usr/share/fonts/truetype/ttf-dejavu/DejaVuSansMono-Bold.ttf" ##"LucidaSansRegular.ttf"
 
 CMDS = ['LOAD', 'CPU', 'BLOCK', 'UNBLOCK', 'EXIT']
 LOAD, CPU, BLOCK, UNBLOCK, EXIT = range(5)

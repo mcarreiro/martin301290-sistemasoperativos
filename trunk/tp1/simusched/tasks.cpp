@@ -13,6 +13,7 @@ void TaskCon(vector<int> params) { // params: n
 	int i = 0;
 	int cant = params[0];
 	int lowest=params[1], highest=params[2];
+	srand ( time(NULL) );
 	int random_integer = lowest + rand() % (highest +1 - lowest) ;
 	while(i< cant){		
 		uso_IO(random_integer);
