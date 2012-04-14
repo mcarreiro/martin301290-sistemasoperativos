@@ -22,23 +22,37 @@ void TaskCon(vector<int> params) { // params: n
 
 }
 
+/**
+ * Esta tarea subdivide la cantidad total de ciclos en subconjuntos de ciclos
+ * la cantidad de subconjuntos es igual o igual+1 a la cantidad de bloqueos que debe realizar
+ * los subconjuntos son dijuntos y estan formados por numeros conitguos donde cada numero representa un ciclo
+ * Dentro de cada subconjunto elige un ciclo aleatoriamente y en ese ciclo bloquea.
+ * Ejemplo:TaskBatch 8 3 
+ * sub conjuntos       sub1 sub2  sub3  sub4
+ * Ciclos              0 1 | 2 3 | 4 5 | 6 7
+ * Ciclo en que bloqua 1   | 2   | 4   |7 (este en realidad no importa porq tiene un contador de bloqueos y este no llegaria a ejecutarlo)
+ * */
 void TaskBatch (vector<int> params){
-	int tot = params[0];
+	int tot = params[0] ;
 	int blocks = params[1];
 	int subCycles = tot / blocks;
 	int random;
 	int from;
 	int to;
+	int contBlocks = 0;
 	srand ( time(NULL) );
 	for(int i=0;i<tot;i++){
-			if(i%subCycles==0){
+			//genero ciclo en que voy a bloquear
+			if(i%subCycles==0 && contBlocks < blocks){
 				from = i;
 				to   =  i + subCycles-1;
-				random = from + rand() % (to +1 - from) ;
-				
+				random = from + rand() % (to - from) ;
+				contBlocks++;
 			}
-			if(random == i){				
-				uso_IO(1);				
+			if(random == i){
+				//si llegue al ciclo de bloqueo bloqueo y sumo 1 (ya que el block demora 1 mas la 1 de la simulacion de la llamada)
+				uso_IO(1);
+				i++;				
 			}else{				
 				uso_CPU(1);
 			}
