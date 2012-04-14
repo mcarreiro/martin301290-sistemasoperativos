@@ -6,8 +6,6 @@
 using namespace std;
 
 SchedLottery::SchedLottery(vector<int> argn) {
-	quantum((unsigned int)argn[1]);
-	
 }
 
 void SchedLottery::load(int pid) {
