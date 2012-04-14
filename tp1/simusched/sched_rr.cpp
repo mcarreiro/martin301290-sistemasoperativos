@@ -112,7 +112,7 @@ int SchedRR::haceExit(const enum Motivo m) {
 }
 
 int SchedRR::haceBlock(const enum Motivo m) {
-	if(NoEstaBloqueado(current_pid())){
+	if(NoEstaBloqueado(current_pid()) == false){
 				bloqueados.insert(bloqueados.begin(), current_pid());
 			}
 			contador = 0;
