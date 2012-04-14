@@ -1,2 +1,2 @@
-*5 TaskCPU 10
-*2 TaskCPU 4
+#*5 TaskCPU 10
+*2 TaskIO 4 4
