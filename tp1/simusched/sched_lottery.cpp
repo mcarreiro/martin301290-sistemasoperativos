@@ -30,16 +30,18 @@ int SchedLottery::tick(const enum Motivo m) {
 	{
 		case BLOCK: return haceBlock();
 		case TICK:  return haceTick();
-		case EXIT:  return haceExit();
+		default:  return haceExit();
 	}		
 }
 
 int SchedLottery::haceBlock(){
-	contador ++;	//Esto es porque al menos uso uno del CPU y para darle la compensacion no puede ser cero
 	int i = buscarProcesoEnCola(current_pid());
+	if (q[i].estado != BLOQUEADO) {
+	contador ++;	//Esto es porque al menos uso uno del CPU y para darle la compensacion no puede ser cero
 	ticketsTotal -= q[i].tickets;
 	q[i].tickets += quantum / contador; // Le asigno la compensacion definida como 1/(contador/quantum) = quantum/contador
 	q[i].estado = BLOQUEADO; // esta bloqueado y tiene tickets de mas, este es el estado de bloqueado
+	}
 
 	if (ticketsTotal > 0) { //Quedan tareas en la cola de activas
 		int ticketGanador = random() % ticketsTotal;			// Consigo el ticket ganador
