@@ -21,7 +21,7 @@ void SchedRR::unblock(int pid) {
   
 	for ( it= bloqueados.begin() ; it < bloqueados.end(); it++ ){
 		if(*it == pid){
-			cout << "Hola" << *it<<endl;
+			//cout << "Hola" << *it<<endl;
 			bloqueados.erase(it);
 			break;
 		}
@@ -35,6 +35,7 @@ int SchedRR::tick(const enum Motivo m) {
 		case BLOCK: return haceBlock(m);		
 		case TICK: return haceTick(m);
 	}
+	return 0;
 	
 }
 
@@ -52,13 +53,14 @@ int SchedRR::haceTick(const enum Motivo m) {
 				for(int i = 0; i < tamCola;i++)
 				{
 						int sig = q.front(); q.pop();
-						if(NoEstaBloqueado(sig)){
+						if(NoEstaBloqueado(sig) == false){
 							return sig;
 						}
 						else{
 							q.push(sig);
 						}							
 				}
+				return IDLE_TASK;
 			}
 			else 
 			{
@@ -71,7 +73,7 @@ int SchedRR::haceTick(const enum Motivo m) {
 					for(int i = 0; i < tamCola;i++)
 					{
 							int sig = q.front(); q.pop();
-							if(NoEstaBloqueado(sig))
+							if(NoEstaBloqueado(sig) == false)
 							{
 								q.push(current_pid());
 								return sig;
@@ -97,7 +99,7 @@ int SchedRR::haceExit(const enum Motivo m) {
 			for(int i = 0; i < tamCola;i++)
 				{
 						int sig = q.front(); q.pop();
-						if(NoEstaBloqueado(sig))
+						if(NoEstaBloqueado(sig) == false)
 							{								
 								return sig;
 						}else{
@@ -118,7 +120,7 @@ int SchedRR::haceBlock(const enum Motivo m) {
 				for(int i = 0; i < tamCola;i++)
 				{
 						int sig = q.front(); q.pop();
-						if(NoEstaBloqueado(sig))
+						if(NoEstaBloqueado(sig) == false)
 							{
 								q.push(current_pid());
 								return sig;
@@ -134,7 +136,7 @@ int SchedRR::haceBlock(const enum Motivo m) {
 
 bool SchedRR::NoEstaBloqueado(int pid)
 {
-	for(int i=0;i < bloqueados.size();i++){
+	for(unsigned int i=0;i < bloqueados.size();i++){
 			if(bloqueados[i] == pid){
 				return true;
 			}
