@@ -19,10 +19,10 @@ void SchedRR::load(int pid) {
 void SchedRR::unblock(int pid) {	
 	//Para desbloquear recorro el vector de bloqueados con un iterador.
 	//Si lo encuentra lo borra, desbloqueandolo.
-	vector<int>::iterator it;
-	for ( it= bloqueados.begin() ; it < bloqueados.end(); it++ ){
-		if(*it == pid){
-			bloqueados.erase(it);
+	vector<int>::iterator it = bloqueados.begin();
+	for (int i = 0 ; i < bloqueados.size(); i++ ){
+		if(*(it+i) == pid){
+			bloqueados.erase(it+i);
 			break;
 		}
 	}
@@ -94,14 +94,14 @@ bool SchedRR::EstaBloqueado(int pid)
 	
 int SchedRR::ProximoProcesoAEjecutar(bool pushearActual){
 	int tamCola = q.size();
+	if(pushearActual){		//Si tengo q meter el actual
+		q.push(current_pid());	//Lo pusheo, porque cuando se desbloquee lo voy a tener que volver a ejecutar
+	}
 	for(int i = 0; i < tamCola;i++) 		//Recorro la lista de procesos...
 	{
 			int sig = q.front(); q.pop();	//Recupero el primero de la cola
 			if(!EstaBloqueado(sig))			//Si no esta bloquedo...
-				{
-					if(pushearActual){		//Si tengo q meter el actual
-						q.push(current_pid());	//Lo pusheo...
-					}
+				{					
 					return sig;				//Lo devuelvo para seguir con este proceso
 				}
 			else{
