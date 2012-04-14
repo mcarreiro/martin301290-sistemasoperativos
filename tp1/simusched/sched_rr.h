@@ -14,6 +14,9 @@ class SchedRR : public SchedBase {
 	
 	private:
 		bool NoEstaBloqueado(int pid);
+		int haceTick(const enum Motivo m);
+		int haceBlock(const enum Motivo m);
+		int haceExit(const enum Motivo m);
 
 		
 		int quantum;
