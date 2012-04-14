@@ -1,0 +1,13 @@
+\select@language {spanish}
+\contentsline {section}{\numberline {1}Ejercicio 2}{3}
+\contentsline {subsection}{\numberline {1.1}Enunciado}{3}
+\contentsline {subsection}{\numberline {1.2}Soluci\'on}{3}
+\contentsline {section}{\numberline {2}Ejercicio 4}{4}
+\contentsline {subsection}{\numberline {2.1}Enunciado}{4}
+\contentsline {subsection}{\numberline {2.2}Soluci\'on}{4}
+\contentsline {section}{\numberline {3}Ejercicio 7}{5}
+\contentsline {subsection}{\numberline {3.1}Enunciado}{5}
+\contentsline {subsection}{\numberline {3.2}Soluci\'on}{5}
+\contentsline {section}{\numberline {4}Ejercicio 8}{6}
+\contentsline {subsection}{\numberline {4.1}Enunciado}{6}
+\contentsline {subsection}{\numberline {4.2}Soluci\'on}{6}
