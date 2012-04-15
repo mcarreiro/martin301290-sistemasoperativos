@@ -47,7 +47,7 @@ int SchedLottery::haceBlock(){
 		int ticketGanador = random() % ticketsTotal;			// Consigo el ticket ganador
 		contador = 0; 							// Reseteo contador para el proximo
 		int indiceGanador = sorteo(ticketGanador);
-		sacarTicketsDeMas(indiceGanador);
+		sacarTicketsDeMas(indiceGanador);				// Le quito los que tiene de mas que gano por bloqueado que solo puede usar una sola vez
 		return q[indiceGanador].pid;
 	}else{
 		return IDLE_TASK;	
@@ -112,7 +112,7 @@ int SchedLottery::sorteo(int ticketGanador){
 }
 
 void SchedLottery::sacarTicketsDeMas(int indiceGanador){
-	if (q[indiceGanador].estado == SOBRAN_TICKETS){			// Si fue compensado hay que sacarle los que tiene de más
+	if (q[indiceGanador].estado == SOBRAN_TICKETS){			// Si fue compensado hay que sacarle los que tiene de más, dejándole solo 1
 			ticketsTotal = ticketsTotal - (q[indiceGanador].tickets - 1);				
 			q[indiceGanador].tickets = 1;
 	}
