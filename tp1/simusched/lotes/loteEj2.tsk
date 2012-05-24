@@ -1,3 +1,3 @@
-TaskCPU 110
-TaskCon 2 1 50
-TaskCon 5 100 150
+TaskCPU 30
+TaskCon 2 1 10
+TaskCon 5 20 50
