@@ -11,12 +11,17 @@ void TaskCPU(vector<int> params) { // params: n
 
 void TaskCon(vector<int> params) { // params: n
 	int i = 0;
+	//obtengo los parametros
 	int cant = params[0];
 	int lowest=params[1], highest=params[2];
 	srand ( time(NULL) );
+	//Genero la duracion random del bloqueo
 	int random_integer = lowest + rand() % (highest +1 - lowest) ;
 	while(i< cant){		
+		//bloqueo
 		uso_IO(random_integer);
+		//vuelvo a generar
+		random_integer = lowest + rand() % (highest +1 - lowest) ;
 		i++;
 	}
 
