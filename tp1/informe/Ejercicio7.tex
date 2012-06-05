@@ -7,13 +7,15 @@
 %\end {center}
 
 Lote simulado con Round Robin:\\\\
-
-TaskBatch 10 1\\
-TaskBatch 20 2\\
-TaskBatch 13 3\\
+\begin {center}
+TaskBatch 17 1\\
+TaskBatch 17 2\\
 TaskBatch 17 3\\
-TaskBatch 27 2\\
-TaskBatch 11 1\\
+TaskBatch 17 4\\
+TaskBatch 17 5\\
+TaskBatch 17 6\\
+TaskBatch 17 7\\
+\end {center}
 
 \par Diagrama con 2 ciclos de quantum:
 
@@ -41,9 +43,9 @@ TaskBatch 11 1\\
 \includegraphics[width=16cm]{../simusched/outputs/ej7/rr-ej7-1-12.png}
 \end {center}
 
-\par Diagrama con 17 ciclos de quantum:
+\par Diagrama con 15 ciclos de quantum:
 \begin {center}
-\includegraphics[width=16cm]{../simusched/outputs/ej7/rr-ej7-1-17.png}
+\includegraphics[width=16cm]{../simusched/outputs/ej7/rr-ej7-1-15.png}
 \end {center}
 
 \par Diagrama con 21 ciclos de quantum:
@@ -51,10 +53,10 @@ TaskBatch 11 1\\
 \includegraphics[width=16cm]{../simusched/outputs/ej7/rr-ej7-1-21.png}
 \end {center}
 
-Se puede observar que a medida que los ciclos del quantum aumentan, las tareas finalizan más rapido, debido a que se les da más tiempo de ejecución, hay una menor cantidad de cambios de contexto entre los procesos y ocurren menos bloqueos por intervalo de ejecución del proceso.
+Se puede observar que a medida que los ciclos del quantum aumentan, las tareas finalizan más rapido, debido a que se les da más tiempo de ejecución y hay una menor cantidad de cambios de contexto entre los procesos (ahorra el ciclo que tarda en realizarlo). Además, el aumento de quantum incide en el tiempo total de ejecución de un proceso, ya que al ocurrir menos bloqueos, provoca que la tarea finalice más rapido.
 \\
-Para este lote de tareas en particular, suele ser más eficiente asignarle una cantidad grande de ciclos por quantum,  ya que se realizarán menos bloqueos y cada proceso podrá finalizar en la menor cantidad de $"$cortes$"$ de ejecución, pero no excesiva, porque, como se aprecia en las imágenes, entre 12 y 21  ciclos por quantum todos tardan lo mismo en finalizar y no mejora la eficiencia.
+Para este lote de tareas en particular, suele ser más eficiente asignarle una cantidad grande de ciclos por quantum,  ya que se realizarán menos bloqueos y menos cambios de contexto, pero no excesiva, porque, como se aprecia en las imágenes, a partir de 12 ciclos por quantum todos tardan lo mismo en finalizar y no mejora la eficiencia, esto es debido a que las tareas se bloquean en menor cantidad y en ningun caso utilizan más del quantum provisto. Por lo tanto, la mejor elección para el quantum es de 12 ciclos.
 \\
-Con un quantum de 21 ciclos, se puede notar que lo que más influye en cada proceso son los bloqueos que se producen y no tanto el corte porque no le quedan más ciclos, produciendo cambios de contexto obligatorios y empeorando bastante la optimización del Round Robin frente a otros algoritmos de scheduling.
+Con un quantum de 12 ciclos en adeltante, se puede notar que lo que más influye en cada proceso son los bloqueos que se producen y no tanto el corte porque no le quedan más ciclos, produciendo cambios de contexto obligatorios y empeorando bastante la optimización del Round Robin frente a otros algoritmos de scheduling.
 
 
