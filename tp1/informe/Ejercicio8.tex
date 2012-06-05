@@ -2,13 +2,21 @@
 
 Presentamos el siguiente lote corrido con distintos semillas de aleatoridad y tamaño de quantum.
 
-TaskBatch 10 1 \\
-TaskBatch 20 1 \\
-TaskBatch 13 3 \\
-TaskBatch 17 1 \\
-TaskBatch 27 1 \\
-TaskBatch 11 2 \\
+Fijar semilla
 
+TaskBatch 10 1 \\
+TaskBatch 10 1 \\
+TaskBatch 11 3 \\
+TaskBatch 10 4 \\
+TaskBatch 10 3 \\
+TaskBatch 10 2 \\
+
+
+Se elige este lote para mostrar procesos similares que asimple vista pueden llegar terminar juntos bajo un scheduler DETERMINISTICO pero la aleatoridad será un punto clave ya que al ser un factor externo sin relacion con los procesos hará que a los procesos se le asignen de diferentes maneras a partir de su compartamiento en cada corrida. 
+
+
+quantum por vez, para ver como el buen compartmiento afecta la aleatoridad
+2,5,9,12,15
 \begin {center}
 \includegraphics[width=16cm]{../simusched/outputs/loterya.png}
 \end {center}
@@ -29,5 +37,9 @@ TaskBatch 11 2 \\
 
 Se puede notar que aunque se elija el mismo lote, la aleatoridad del algoritmo muestra como aunque se asignen de distinta forma los recursos, todos los procesos
 tienden a obtenerlos uniformemente.\\
+
+Cuenta tiempo de espera para cada gantt y ver que son parecido, si no son parecidos, cambiar linea ed arriba
+
+
 Utilizamos el mismo ejemplo para notar la $"$compensación$"$. Notese como en el A el proceso 1 después de haber bloqueado 2 veces obtuvo tantos tickets que casi tuvo
 exclusividad del procesador. Por el contrario el proceso 4 tuvo que esperar varios sorteos hasta salir ganador.
