@@ -17,23 +17,30 @@ RWSemaphoreLock :: RWLock(){
 	//cantidad de lectores empieza en 0, of course
 	readersQuantity = 0;
 }
-void RWLock :: wunlock(){
+void RWSemaphoreLock :: wunlock(){
 	//libero el recurso y pongo en 0 la cantidad de escritores
 				
 	sem_signal(&freeResource);		
 	sem_signal(&writers);
 }
-void RWLock :: rlock(){
+void RWLock :: wlock(){
+	//espero que no haya nadie escribiendo y tomo el recurso
+	sem_wait(&writers);
+    sem_wait(&freeResource);
+}
+void RWSemaphoreLock :: rlock(){
+	//veo que no haya nadie escribiendo
+	sem_wait(&writers);
+	//inhibo el bloqueo para pedidos de escritura
+	sem_signal(&writers);
 	
-	sem_wait(&writers);				/* Si cuando se hace un lock de lectura, hay alguno de escritura esperando, el de lectura se va a quedar esperando en este wait, y va a continuar cuando se libere la escritura */
-	sem_signal(&writers);			/* Este signal lo hago porque no quiero que la lectura me bloquee a que lleguen pedidos de escritura */
+    pthread_mutex_lock(&readersQuantity);		
+    
+    readersQuantity++;//aumento la cantidad de lectores
+    if(readersQuantity == 1)					
+    	sem_wait(&freeResource);//si soy el primer lector tomo el recurso
 	
-    pthread_mutex_lock(&readersQuantity);		/* Pido el mutex para ver la cantidad de lectores */
-    readersQuantity++;						/* Digo que hay un nuevo lector */
-    if(readersQuantity == 1)					/* Si hay un solo lector... */
-    	sem_wait(&freeResource);		/* ... es porque soy el primer lector en entrar. Entonces digo que el recurso esta ocupado (para lo escritores, los lectores pueden seguir entrando) */
-	
-	pthread_mutex_unlock(&readersQuantity)	/* Libero el mutex */    
+	pthread_mutex_unlock(&readersQuantity)
 }
 void RWSemaphoreLock :: runlock(){
 	//pido mutex para la sección crítica
