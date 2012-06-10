@@ -17,17 +17,6 @@ RWSemaphoreLock :: RWLock(){
 	//cantidad de lectores empieza en 0, of course
 	readersQuantity = 0;
 }
-void RWSemaphoreLock :: wunlock(){
-	//libero el recurso y pongo en 0 la cantidad de escritores
-				
-	sem_signal(&freeResource);		
-	sem_signal(&writers);
-}
-void RWLock :: wlock(){
-	//espero que no haya nadie escribiendo y tomo el recurso
-	sem_wait(&writers);
-    sem_wait(&freeResource);
-}
 void RWSemaphoreLock :: rlock(){
 	//veo que no haya nadie escribiendo
 	sem_wait(&writers);
@@ -42,6 +31,14 @@ void RWSemaphoreLock :: rlock(){
 	
 	pthread_mutex_unlock(&readersQuantity)
 }
+void RWSemaphoreLock :: wunlock(){
+	//libero el recurso y pongo en 0 la cantidad de escritores
+				
+	sem_signal(&freeResource);		
+	sem_signal(&writers);
+}
+
+
 void RWSemaphoreLock :: runlock(){
 	//pido mutex para la sección crítica
 	pthread_mutex_lock(&mutexReaders)
