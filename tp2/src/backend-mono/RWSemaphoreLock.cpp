@@ -33,8 +33,9 @@ void RWSemaphoreLock :: rlock(){
 }
 
 void RWLock :: wlock(){
-	//espero que no haya nadie escribiendo y tomo el recurso
+	//espero que terminen de leer pero ya se que el siguiente soy yo
 	sem_wait(&writers);
+	//Ya se que cuando termine de leer (otros) o de escribir (otro) el próximo soy yo
     	sem_wait(&freeResource);
 }
 
