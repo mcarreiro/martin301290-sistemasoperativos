@@ -5,7 +5,7 @@
 
 class RWSemaphoreLock {
     public:
-        RWLock();
+        RWSemaphoreLock();
         void rlock();
         void wlock();
         void runlock();

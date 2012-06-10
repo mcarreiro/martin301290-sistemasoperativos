@@ -10,15 +10,14 @@ using namespace std;
 
 // variables globales de la conexión
 int socket_servidor = -1;
-//vector de conexiones
-vector<int> connectionSockets;
+vector<int> sockets_clientes;					/* Vector de sockets para las conecciones entrantes */
 
 // variables globales del juego
 vector<vector<char> > tablero_letras; 			/* Tiene letras que aún no son palabras válidas */
-vector<RWLock> sem_tablero_letras;				/* Tiene semaforos para cada una de las posiciones del tablero_letras */
+vector<RWSemaphoreLock> sem_tablero_letras;				/* Tiene semaforos para cada una de las posiciones del tablero_letras */
 
 vector<vector<char> > tablero_palabras;			/* Solamente tiene las palabras válidas */
-RWLock sem_tablero_palabras;					/* Semaforos para tablero_palabras*/
+RWSemaphoreLock sem_tablero_palabras;					/* Semaforos para tablero_palabras*/
 
 
 
@@ -62,14 +61,14 @@ int main(int argc, const char* argv[]) {
 		tablero_letras[i] = vector<char>(ancho, VACIO);
 	}
 	
-	sem_tablero_letras = vector<RWLock>((alto*ancho), RWLock()); 		/* Inicializo el tablero de semaforos para tablero_letras */
+	sem_tablero_letras = vector<RWSemaphoreLock>((alto*ancho), RWSemaphoreLock()); 		/* Inicializo el tablero de semaforos para tablero_letras */
 
 	tablero_palabras = vector<vector<char> >(alto);
 	for (unsigned int i = 0; i < alto; ++i) {
 		tablero_palabras[i] = vector<char>(ancho, VACIO);
 	}
 	
-	sem_tablero_palabras = RWLock();									/* Inicializo el lock del tablero_palabras */
+	sem_tablero_palabras = RWSemaphoreLock();									/* Inicializo el lock del tablero_palabras */
 	
 	int socketfd_cliente, socket_size;
 	struct sockaddr_in local, remoto;
@@ -106,9 +105,9 @@ int main(int argc, const char* argv[]) {
 			
 			//close(socket_servidor);
 			
-			connectionSockets.push_back(socketfd_cliente);
+			sockets_clientes.push_back(socketfd_cliente);
 			pthread_t atiendo_jugador;
-			pthread_create(&atiendo_jugador, NULL, pre_atendedor_de_jugador, (void*) &(connectionSockets[connectionSockets.size() - 1]));
+			pthread_create(&atiendo_jugador, NULL, pre_atendedor_de_jugador, (void*) &(sockets_clientes[sockets_clientes.size() - 1]));
 									
 		}
 	}

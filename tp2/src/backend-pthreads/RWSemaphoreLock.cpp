@@ -1,6 +1,6 @@
 #include "RWSemaphoreLock.h"
 
-RWSemaphoreLock :: RWLock(){
+RWSemaphoreLock :: RWSemaphoreLock(){
 	
 	//Inicializo mutexReaders en algun valor
 	pthread_mutex_init(&mutexReaders, NULL); 
@@ -21,24 +21,24 @@ void RWSemaphoreLock :: rlock(){
 	//veo que no haya nadie escribiendo
 	sem_wait(&writers);
 	//inhibo el bloqueo para pedidos de escritura
-	sem_signal(&writers);
+	sem_post(&writers);
 	
-    pthread_mutex_lock(&readersQuantity);		
+    pthread_mutex_lock(&mutexReaders);		
     
     readersQuantity++;//aumento la cantidad de lectores
     if(readersQuantity == 1)					
     	sem_wait(&freeResource);//si soy el primer lector tomo el recurso
 	
-	pthread_mutex_unlock(&readersQuantity)
+	pthread_mutex_unlock(&mutexReaders);
 }
 void RWSemaphoreLock :: wunlock(){
 	//libero el recurso y pongo en 0 la cantidad de escritores
 				
-	sem_signal(&freeResource);		
-	sem_signal(&writers);
+	sem_post(&freeResource);		
+	sem_post(&writers);
 }
 
-void RWLock :: wlock(){
+void RWSemaphoreLock :: wlock(){
 	//espero que no haya nadie escribiendo y tomo el recurso
 	sem_wait(&writers);
     sem_wait(&freeResource);
@@ -46,7 +46,7 @@ void RWLock :: wlock(){
 
 void RWSemaphoreLock :: runlock(){
 	//pido mutex para la sección crítica
-	pthread_mutex_lock(&mutexReaders)
+	pthread_mutex_lock(&mutexReaders);
 	//decremento la cantidad de lectores		
 	readersQuantity--;
 	//si no quedan mas lectores libero el recurso
