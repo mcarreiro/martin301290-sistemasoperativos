@@ -1,4 +1,4 @@
-#include "RWLockSemaphoreLock.h"
+#include "RWSemaphoreLock.h"
 
 RWSemaphoreLock :: RWLock(){
 	
