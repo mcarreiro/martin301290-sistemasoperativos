@@ -1,7 +1,6 @@
 #include "Backend_pthreads.h"
 #include "pthread.h"
 
-//#include "RWLock.cpp"
 #include "RWSemaphoreLock.cpp"
 
 
@@ -10,14 +9,13 @@ using namespace std;
 
 // variables globales de la conexión
 int socket_servidor = -1;
-vector<int> sockets_clientes;					/* Vector de sockets para las conecciones entrantes */
+
 
 // variables globales del juego
-vector<vector<char> > tablero_letras; 			/* Tiene letras que aún no son palabras válidas */
-vector<RWSemaphoreLock> sem_tablero_letras;				/* Tiene semaforos para cada una de las posiciones del tablero_letras */
-
-vector<vector<char> > tablero_palabras;			/* Solamente tiene las palabras válidas */
-RWSemaphoreLock sem_tablero_palabras;					/* Semaforos para tablero_palabras*/
+vector<vector<char> > tablero_letras; // tiene letras que aún no son palabras válidas
+vector<vector<char> > tablero_palabras;	// solamente tiene las palabras válidas
+vector< vector<RWSemaphoreLock> > semaforosLetras;// semaforo para posiciones del tablero de letras
+RWSemaphoreLock semaforoPalabra;//semaforo para el tablero de palabras
 
 
 
@@ -54,21 +52,25 @@ int main(int argc, const char* argv[]) {
 			return 5;
 		}
 	}
-
+	//creo las filas del tablero de semoforos de letras
+	semaforosLetras = vector<vector<RWSemaphoreLock> >(alto); 
 	// inicializar ambos tableros, se accede como tablero[fila][columna]
 	tablero_letras = vector<vector<char> >(alto);
 	for (unsigned int i = 0; i < alto; ++i) {
+		//Creo lo semaforos de cada columna
+		semaforosLetras[i] =  vector<RWSemaphoreLock>((ancho), RWSemaphoreLock());
 		tablero_letras[i] = vector<char>(ancho, VACIO);
 	}
 	
-	sem_tablero_letras = vector<RWSemaphoreLock>((alto*ancho), RWSemaphoreLock()); 		/* Inicializo el tablero de semaforos para tablero_letras */
+	
 
 	tablero_palabras = vector<vector<char> >(alto);
 	for (unsigned int i = 0; i < alto; ++i) {
+		
 		tablero_palabras[i] = vector<char>(ancho, VACIO);
 	}
 	
-	sem_tablero_palabras = RWSemaphoreLock();									/* Inicializo el lock del tablero_palabras */
+	semaforoPalabra = RWSemaphoreLock();									/* Inicializo el lock del tablero_palabras */
 	
 	int socketfd_cliente, socket_size;
 	struct sockaddr_in local, remoto;
@@ -102,12 +104,9 @@ int main(int argc, const char* argv[]) {
 		if ((socketfd_cliente = accept(socket_servidor, (struct sockaddr*) &remoto, (socklen_t*) &socket_size)) == -1)
 			cerr << "Error al aceptar conexion" << endl;
 		else {
-			
-			//close(socket_servidor);
-			
-			sockets_clientes.push_back(socketfd_cliente);
-			pthread_t atiendo_jugador;
-			pthread_create(&atiendo_jugador, NULL, pre_atendedor_de_jugador, (void*) &(sockets_clientes[sockets_clientes.size() - 1]));
+			//creo el thread que va a handlear la nueva conexion
+			pthread_t jugador_thread;
+			pthread_create(&jugador_thread, NULL, atendedorDeJugadorWrapper, (void*) &socketfd_cliente);
 									
 		}
 	}
@@ -115,7 +114,7 @@ int main(int argc, const char* argv[]) {
 	return 0;
 }
 
-void* pre_atendedor_de_jugador(void* socket_fd)
+void* atendedorDeJugadorWrapper(void* socket_fd)
 {
 	atendedor_de_jugador(*((int*) socket_fd));
 	return NULL;
@@ -153,17 +152,17 @@ void atendedor_de_jugador(int socket_fd) {
 			// verificar si es una posición válida del tablero
 			if (es_ficha_valida_en_palabra(ficha, palabra_actual)) {
 				
-				/* Si la ficha es valida en la palabra, tengo que ver que el casillero este libre antes de ponerla */
-								
-				sem_tablero_letras[ficha.fila * ancho + ficha.columna].wlock();			/* Pido el lock de ESCRITURA para ver el estado del casillero y actualizarlo de ser necesario */
+				//Espero que se libere la casilla para poder escribir la letra			
+				semaforosLetras[ficha.fila] [ficha.columna].wlock();
 				
 				if(tablero_letras[ficha.fila][ficha.columna] == VACIO)
 				{
 					/* Pongo la ficha */
 										
 					palabra_actual.push_back(ficha);
-					tablero_letras[ficha.fila][ficha.columna] = ficha.letra;			/* Pongo la letra */
-					sem_tablero_letras[ficha.fila * ancho + ficha.columna].wunlock();	/* Libero el lock de ESCRITURA */
+					tablero_letras[ficha.fila][ficha.columna] = ficha.letra;
+					//libero la posicion
+					semaforosLetras[ficha.fila] [ficha.columna].wunlock();
 					
 					/* Envio el OK */
 					
@@ -179,8 +178,8 @@ void atendedor_de_jugador(int socket_fd) {
 				else
 				{
 					/* No pongo la ficha */
-										
-					sem_tablero_letras[ficha.fila * ancho + ficha.columna].wunlock();	/* Libero el lock de ESCRITURA */
+					//libero la posicion					
+					semaforosLetras[ficha.fila][ficha.columna].wunlock();
 					quitar_letras(palabra_actual);
 					
 					// ERROR
@@ -210,16 +209,16 @@ void atendedor_de_jugador(int socket_fd) {
 		}
 		else if (comando == MSG_PALABRA) {
 			// las letras acumuladas conforman una palabra completa, escribirlas en el tablero de palabras y borrar las letras temporales
-			
-			sem_tablero_palabras.wlock();		/* Pido un lock de ESCRITURA antes de hacer palabra */
+			//Espero que se libere el tablero para agregar la palabra
+			semaforoPalabra.wlock();		
 			
 			for (list<Casillero>::const_iterator casillero = palabra_actual.begin(); casillero != palabra_actual.end(); casillero++) {
 				
 				tablero_palabras[casillero->fila][casillero->columna] = casillero->letra;
 			}
 			palabra_actual.clear();
-			
-			sem_tablero_palabras.wunlock();		/* Libero el lock de ESCRITURA */
+			//libero el tablero
+			semaforoPalabra.wunlock();
 
 			if (enviar_ok(socket_fd) != 0) {
 				// se produjo un error al enviar. Cierro el thread.
@@ -319,8 +318,8 @@ int enviar_tablero(int socket_fd) {
 	char buf[MENSAJE_MAXIMO+1];
 	sprintf(buf, "STATUS ");
 	int pos = 7;
-	
-	sem_tablero_palabras.rlock();			/* Pido un lock de LECTURA del tablero palabras */
+	//espero para podeer leer el tablero de palabras
+	semaforoPalabra.rlock();
 	
 	for (unsigned int fila = 0; fila < alto; ++fila) {
 		for (unsigned int col = 0; col < ancho; ++col) {
@@ -329,8 +328,8 @@ int enviar_tablero(int socket_fd) {
 			pos++;
 		}
 	}
-	
-	sem_tablero_palabras.runlock();			/* Libero el lock de LECTURA */
+	//Libero el tablero de palabars
+	semaforoPalabra.runlock();	
 		
 	buf[pos] = 0; //end of buffer
 
@@ -374,10 +373,14 @@ void terminar_servidor_de_jugador(int socket_fd, list<Casillero>& palabra_actual
 
 void quitar_letras(list<Casillero>& palabra_actual) {
 	for (list<Casillero>::const_iterator casillero = palabra_actual.begin(); casillero != palabra_actual.end(); casillero++) {
+		//Espero el recurso para escribir en la posicion correspondiente del tablero de letras
+		semaforosLetras[casillero->fila][casillero->columna].wlock();
 		
-		sem_tablero_letras[casillero->fila * ancho + casillero->columna].wlock();
+		
 		tablero_letras[casillero->fila][casillero->columna] = VACIO;
-		sem_tablero_letras[casillero->fila * ancho + casillero->columna].wunlock();
+		
+		//Libero la posicion del tablero de letras
+		semaforosLetras[casillero->fila ][ casillero->columna].wunlock();
 	}
 	palabra_actual.clear();
 }
@@ -392,16 +395,16 @@ bool es_ficha_valida_en_palabra(const Casillero& ficha, const list<Casillero>& p
 	
 	/* Veo primero si el casillero esta ocupado */
 	
-	sem_tablero_letras[ficha.fila * ancho + ficha.columna].rlock();			/* Pido un lock de LECTURA */
+	semaforosLetras[ficha.fila ][ficha.columna].rlock();			/* Pido un lock de LECTURA */
 	if(tablero_letras[ficha.fila][ficha.columna] != VACIO)
 	{
 		/* Si el casillero estaba ocupado, devuelvo falso */
 		
-		sem_tablero_letras[ficha.fila * ancho + ficha.columna].runlock();	/* Libero el lock de LECTURA */
+		semaforosLetras[ficha.fila][ ficha.columna].runlock();	/* Libero el lock de LECTURA */
 		return false;
 	}
 	
-	sem_tablero_letras[ficha.fila * ancho + ficha.columna].runlock();		/* Libero el lock de LECTURA */
+	semaforosLetras[ficha.fila][ ficha.columna].runlock();		/* Libero el lock de LECTURA */
 					 
 	if (palabra_actual.size() > 0) {
 		
