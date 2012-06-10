@@ -38,6 +38,11 @@ void RWSemaphoreLock :: wunlock(){
 	sem_signal(&writers);
 }
 
+void RWLock :: wlock(){
+	//espero que no haya nadie escribiendo y tomo el recurso
+	sem_wait(&writers);
+    sem_wait(&freeResource);
+}
 
 void RWSemaphoreLock :: runlock(){
 	//pido mutex para la sección crítica
