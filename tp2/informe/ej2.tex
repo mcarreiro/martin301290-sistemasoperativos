@@ -1,0 +1,68 @@
+Para el ejercicio 2 lo que hicimos fue basarnos en el backend_mono. En el main, cuando la ejecución se queda loopeando en el while(true) le sacamos la linea que cierra la conexión (en el momento que esta se etablece exitosamente) e hicimos que al cliente lo atienda un thread a través de la función 'wrapper' (que fué necesario crear para que reciba un puntero a void, lo castee a int y se lo envíe a la funcion ya existente 'atendedor_de_jugador'). De esta manera cada conexión entrante es atendida por un trhead y se aceptan multiples conexiones. Luego como cada thread escribe sobre los mismos tableros (el de palabras y el de letras) fue necesario crear semáforos (utilizando la librería creada en el ejercicio anterior). Un semáforo para el tablero de palabras que hace que no puedan escribir 2 threads distintos al mismo tiempo sobre este, osea que no puedan gritar 'palabra' exactamente al mismo tiempo y un tablero de semáforos para cada posicion del tablero de letras. Este último es para que a medida que van formando las palabras no puedan escribir una letra sobre el mismo casillero al mismo tiempo. \\
+Finalmente agregamos estos semáforos a la hora de escribir/leer alguno de los dos tableros. Esto podemos observarlo mejor en los siguientes pseudocodigos(vamos a poner el pseudocódigo de lo que agregamos, no de lo que ya estaba):\\
+\\
+
+
+MAIN \\
+...
+Inicializamos los semaforos\\
+...
+Cuando llega una nueva conexion \\
+Si se establece exitosamente\\
+	Creamos un thread\\
+	hacemos que este nuevo cliente sea atendido por el thread a traves de la funcion wrapper\\
+
+
+\\
+
+wrapper\\
+Casteo el parametro de entrada a int y se lo envio a atendedor_de_jugador
+
+
+atendedor_de_jugador\\ \\
+...
+Si estoy agregando una letra\\
+	pido el recurso para escribir esa casilla
+	escribo la letra
+	libero el recurso de la casilla
+...
+Si quiero agregar una palabra
+	pido el recurso para escribir el tablero de palabras
+	escribo todas las letras
+	libero el recurso para el tablero de palabras
+
+
+enviar_tablero\\
+
+pido el recurso para leer el tablero de palabras
+leo todo el tablero
+libero el recurso para el tablero de palabras
+
+
+quitar_letras\\
+
+para cada casilla del tablero de letras
+	pido el recurso para escribir esa casilla
+		escribo el valor VACIO
+	libero el recurso
+
+es_ficha_valida_en_palabra\\
+...
+Pido el recurso para leer la casilla
+si la casilla esta vacia
+	libero el recurso
+	devuelvo false
+libero el recurso
+...
+si no es la primera letra de la palabra 
+	...
+	para cada casilla entre la nueva letra y las ya puestas
+		pido recurso para leer esa casilla
+		si esta vacia
+			libero el recurso
+			devuelvo false
+		libero el recurso
+						
+...
+
+
