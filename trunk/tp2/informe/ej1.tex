@@ -7,7 +7,11 @@ A continuación el pseudocodigo de la nueva libreria RWSemaphoreLock:\\
 \subsection{Pseudoc\'odigo}
 
 \begin{codebox}
-WLOCK
+WLOCK\\
+-------\\
+Descripción:\\
+En el wlock, primero hay que esperar que no haya lectores, y luego, hay que esperar que el recurso no esté tomado por otros para poder obtenerlo.\\
+
 /**espero que no haya ningún escritor**/ \\
 hayEscritores.wait() \\
 /**espero que se libere el recurso y lo tomo**/ \\
@@ -15,11 +19,18 @@ recurso.wait() \\
 \end{codebox}
 WUNLOCK\\
 -------		\\		
+Descripción:\\
+Primero se libera el recurso, indicando que el escritor se fue y puedan entrar los siguientes lectores o escritores.
+Segundo se libera la exclusividad del escritor. \\
 	freeResource.signal()		// Libero el recurso	\\
 	writers.signal()		// Libero la exclusividad de los escritores\\
 
 RLOCK\\
 -----\\
+Descripción:\\
+El algoritmo primero realiza un wait y signal del semaforo writers para evitar la inanición de los lectores, ya que en caso de que haya un escritor antes se quedará esperando.
+Luego, aumenta el numero de lectores, y en caso de ser el primero toma el recurso, en otro caso no necesitara tomarlo ya que algún lector lo tomó antes. \\
+
 	writers.wait()			// Espero que no haya escritores, para no "colarme" y evitar la inanición.\\
 	writers.post()			// Libero el semaforo para que los que vengan puedan seguir.\\
 	mutexReaders.wait()		// Tomo el mutex\\
@@ -29,6 +40,9 @@ RLOCK\\
 	mutexReaders.signal()		// Libero el mutex\\
 \\
 RUNLOCK\\
+--------\\
+Descripción:\\
+Para desbloquear a los lectores, primero se decrementa la cantidad de lectores y luego, en caso de ser el último, se libera el recurso. Todo dentro del mutex para asegurar exclusión mutua de la variable.\\
 //espero el mutex para asegurarme el uso exclusivo sobre lectores\\
 mutexLectores.wai().\\
 //disminuyo la cantidad de lectores\\
