@@ -9,7 +9,7 @@ A continuación el pseudocódigo de la nueva librería RWSemaphoreLock:\\
 \textbf WLOCK
 
 Descripción:\\
-En el wlock, primero hay que esperar que no haya lectores y luego  que el recurso no esté tomado por otros para poder obtenerlo.
+En el wlock, primero hay que esperar que no haya escritores o lector y luego  que el recurso no esté tomado por otros para poder obtenerlo.
 \begin{codebox}
 
 \li	writers.wait() 		\RComment Espero que no haya ningún escritor
@@ -29,11 +29,11 @@ Segundo se libera la exclusividad del escritor, realizando un signal de \textit{
 \textbf RLOCK
 
 Descripción:\\
-El algoritmo primero realiza un wait y signal del semáforo \textit{writers} para evitar la inanición de los lectores, ya que en caso de que haya un escritor antes se quedará esperando.
+El algoritmo primero realiza un wait y signal del semáforo \textit{writers} para evitar la inanición de los lectores, ya que en caso de que haya un escritor antes el lector se quedará esperando.
 Luego, aumenta el número de lectores, y en caso de ser el primero toma el recurso, en otro caso no necesitara tomarlo ya que algún lector lo tomó antes. 
 \begin{codebox}
-\li	writers.wait()			\RComment Espero que no haya escritores, para no "colarme" y evitar la inanición.
-\li	writers.post()			\RComment Libero el semaforo para que los que vengan puedan seguir.
+\li	writers.wait()			\RComment Espero que no haya escritores, para no $"$colarme$"$ y evitar la inanición.
+\li	writers.post()			\RComment Libero el semáforo para que los que vengan puedan seguir.
 \li	mutexReaders.wait()		\RComment Tomo el mutex
 \li	readersQuantitiy++		\RComment Incremento la cantidad de lectores
 \li	\textbf{Si} readersQuantity == 1 \Do	\RComment Si soy el primero... 
@@ -52,7 +52,7 @@ Para desbloquear a los lectores, primero se decrementa la cantidad de lectores y
 \li	readersQuantitiy- - \RComment Disminuyo la cantidad de lectores
 
 \li	\textbf{Si} readersQuantitiy == 0 \Do \RComment Si soy el ultimo lector que quedaba ... 
-\li	freeResource.signal()\End  \RComment ... libero el recurso así puede tomarlo un escritor (en el caso que hubiese uno esperando)
+\li	freeResource.signal()\End  \RComment ... libero el recurso así puede tomarlo un escritor o lector (en el caso que hubiese uno esperando)
 
 \li	mutexReaders.signal() \RComment Libero el mutex
 \end{codebox}
