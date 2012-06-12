@@ -9,11 +9,19 @@ hayEscritores.wait()
 recurso.wait()
 
 WUNLOCK
-
+-------				
+	freeResource.signal()		// Libero el recurso	
+	writers.signal()		// Libero la exclusividad de los escritores
 
 RLOCK
-
-
+-----
+	writers.wait()			// Espero que no haya escritores, para no "colarme" y evitar la inanición.
+	writers.post()			// Libero el semaforo para que los que vengan puedan seguir.
+	mutexReaders.wait()		// Tomo el mutex
+	readersQuantitiy++		// Incremento la cantidad de lectores
+	if(readersQuantity == 1)	// Si soy el primero... 
+		freeResource.wait()	// .. Tomo el recurso para los lectores
+	mutexReaders.signal()		// Libero el mutex
 
 RUNLOCK
 //espero el mutex para asegurarme el uso exclusivo sobre lectores
