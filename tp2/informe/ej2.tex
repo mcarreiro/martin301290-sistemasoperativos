@@ -1,68 +1,79 @@
-Para el ejercicio 2 lo que hicimos fue basarnos en el backend_mono. En el main, cuando la ejecución se queda loopeando en el while(true) le sacamos la linea que cierra la conexión (en el momento que esta se etablece exitosamente) e hicimos que al cliente lo atienda un thread a través de la función 'wrapper' (que fué necesario crear para que reciba un puntero a void, lo castee a int y se lo envíe a la funcion ya existente 'atendedor_de_jugador'). De esta manera cada conexión entrante es atendida por un trhead y se aceptan multiples conexiones. Luego como cada thread escribe sobre los mismos tableros (el de palabras y el de letras) fue necesario crear semáforos (utilizando la librería creada en el ejercicio anterior). Un semáforo para el tablero de palabras que hace que no puedan escribir 2 threads distintos al mismo tiempo sobre este, osea que no puedan gritar 'palabra' exactamente al mismo tiempo y un tablero de semáforos para cada posicion del tablero de letras. Este último es para que a medida que van formando las palabras no puedan escribir una letra sobre el mismo casillero al mismo tiempo. \\
-Finalmente agregamos estos semáforos a la hora de escribir/leer alguno de los dos tableros. Esto podemos observarlo mejor en los siguientes pseudocodigos(vamos a poner el pseudocódigo de lo que agregamos, no de lo que ya estaba):\\
+\section{Ejericio 2}
+\subsection{Descripción}
+Para el ejercicio 2 lo que hicimos fue basarnos en el backend$\_$mono. En el main, cuando la ejecución se queda  \textit{loopeando} en el while(true) le sacamos la línea que cierra la conexión (en el momento que esta se etablece exitosamente) e hicimos que al cliente lo atienda un thread a través de la función \textbf{wrapper} (que fué necesario crear para que reciba un puntero a void, lo castee a int y se lo envíe a la funcion ya existente \textbf{atendedor$\_$de$\_$jugador}). De esta manera cada conexión entrante es atendida por un thread y se aceptan multiples conexiones. Luego como cada thread escribe sobre los mismos tableros (el de palabras y el de letras) fue necesario crear semáforos (utilizando la librería creada en el ejercicio anterior). Un semáforo para el tablero de palabras que hace que no puedan escribir 2 threads distintos al mismo tiempo sobre este, osea que no puedan gritar  \textbf{palabra} exactamente al mismo tiempo y un tablero de semáforos para cada posicion del tablero de letras. Este último es para que a medida que van formando las palabras no puedan escribir una letra sobre el mismo casillero al mismo tiempo. \\
+Finalmente agregamos estos semáforos a la hora de escribir/leer alguno de los dos tableros. Esto podemos observarlo mejor en los siguientes pseudocódigos(vamos a poner el pseudocódigo de lo que agregamos, no de lo que ya estaba):\\
 \\
 
-
-MAIN \\
-...
-Inicializamos los semaforos\\
-...
-Cuando llega una nueva conexion \\
-Si se establece exitosamente\\
-	Creamos un thread\\
-	hacemos que este nuevo cliente sea atendido por el thread a traves de la funcion wrapper\\
-
-
-\\
-
-wrapper\\
-Casteo el parametro de entrada a int y se lo envio a atendedor_de_jugador
+\subsection{Pseudocódigo}
+\mbox{}\\
+\textbf {main}
+\begin{codebox}
+\li (...)
+\li Inicializamos los semáforos
+\li (...)
+\li Cuando llega una nueva conexión 
+\li \textbf{Si} se establece exitosamente \Do
+\li	Creamos un thread
+\li	hacemos que este nuevo cliente sea atendido por el thread a través de la función wrapper \End
+\end{codebox}
 
 
-atendedor_de_jugador\\ \\
-...
-Si estoy agregando una letra\\
-	pido el recurso para escribir esa casilla
-	escribo la letra
-	libero el recurso de la casilla
-...
-Si quiero agregar una palabra
-	pido el recurso para escribir el tablero de palabras
-	escribo todas las letras
-	libero el recurso para el tablero de palabras
+\mbox{}\\
+\textbf {wrapper}
+\begin{codebox}
+\li Casteo el parámetro de entrada a int y se lo envío a atendedor$\_$de$\_$jugador
+\end{codebox}
 
+\mbox{}\\
+\textbf{atendedor$\_$de$\_$jugador}
+\begin{codebox}
+\li (...)
+\li \textbf{Si} estoy agregando una letra\Do
+\li	pido el recurso para escribir esa casilla
+\li	escribo la letra
+\li	libero el recurso de la casilla \End
+\li (...)
+\li \textbf{Si} quiero agregar una palabra\Do
+\li	pido el recurso para escribir el tablero de palabras
+\li	escribo todas las letras
+\li	libero el recurso para el tablero de palabras \End
+\end{codebox}
 
-enviar_tablero\\
+\mbox{}\\
+\textbf{enviar$\_$tablero}
+\begin{codebox}
+\li pido el recurso para leer el tablero de palabras
+\li leo todo el tablero
+\li libero el recurso para el tablero de palabras
+\end{codebox}
 
-pido el recurso para leer el tablero de palabras
-leo todo el tablero
-libero el recurso para el tablero de palabras
-
-
-quitar_letras\\
-
-para cada casilla del tablero de letras
-	pido el recurso para escribir esa casilla
-		escribo el valor VACIO
-	libero el recurso
-
-es_ficha_valida_en_palabra\\
-...
-Pido el recurso para leer la casilla
-si la casilla esta vacia
-	libero el recurso
-	devuelvo false
-libero el recurso
-...
-si no es la primera letra de la palabra 
-	...
-	para cada casilla entre la nueva letra y las ya puestas
-		pido recurso para leer esa casilla
-		si esta vacia
-			libero el recurso
-			devuelvo false
-		libero el recurso
-						
-...
-
+\mbox{}\\
+\textbf{quitar$\_$letras} 
+\begin{codebox}
+\li \textbf{Para} cada casilla del tablero de letras \Do
+\li	pido el recurso para escribir esa casilla
+\li	escribo el valor VACÍO
+\li	libero el recurso \End
+\end{codebox}
+\mbox{}\\
+\textbf{es$\_$ficha$\_$valida$\_$en$\_$palabra}
+\begin{codebox}
+\li (...)
+\li Pido el recurso para leer la casilla
+\li \textbf{Si} la casilla esta vacia\Do
+\li	libero el recurso
+\li	devuelvo false\End
+\li libero el recurso
+\li (...)
+\li \textbf{Si} no es la primera letra de la palabra \Do
+\li	(...)
+\li	\textbf{Para} cada casilla entre la nueva letra y las ya puestas \Do
+\li		Pido recurso para leer esa casilla
+\li		\textbf{Si} está vacía \Do
+\li			libero el recurso
+\li			devuelvo false \End
+\li		libero el recurso \End \End
+\li						
+\li (...)
+\end{codebox}
 
