@@ -3,9 +3,25 @@ Para implementar una librería Read_Write Lock libre de inanición, utilizamos s
 A continuación el pseudocodigo de la nueva libreria RWSemaphoreLock:
 
 WLOCK
+//espero que no haya ningún escritor
+hayEscritores.wait()
+//espero que se libere el recurso y lo tomo
+recurso.wait()
 
 WUNLOCK
 
+
 RLOCK
 
+
+
 RUNLOCK
+//espero el mutex para asegurarme el uso exclusivo sobre lectores
+mutexLectores.wai().
+//disminuyo la cantidad de lectores
+lectores--
+//si soy el ultimo lector que quedaba libero el recurso así puede tomarlo un escritor (en el caso que hubiese uno esperando)
+if(lectores == 0)
+	recurso.signal()
+//libero el mutex
+mutexLectores.signal()
