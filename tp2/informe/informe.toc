@@ -1,0 +1,4 @@
+\select@language {spanish}
+\contentsline {section}{\numberline {1}Ejericio 1}{3}
+\contentsline {subsection}{\numberline {1.1}Librer\IeC {\'\i }a RWLock sin inanici\IeC {\'o}n}{3}
+\contentsline {subsection}{\numberline {1.2}Pseudoc\'odigo}{3}

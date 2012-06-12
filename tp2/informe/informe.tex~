@@ -1,0 +1,48 @@
+\documentclass[8pt, A4]{article}
+
+%Margenes de la pagina.  otra opcion, usar \usepackage{a4wide}
+\usepackage[paper=a4paper, left=0.8cm, right=0.8cm, bottom=1.3cm, top=0.9cm]{geometry}
+\usepackage{color}
+
+%este paquete permite incluir acentos.  Notar que espera un formato ANSI-blah de archivo.  Si en lugar de eso se tiene un utf8 (usual en los linux), entonces usar \usepackage[utf8]{inputenc}
+\usepackage[utf8]{inputenc}
+
+%Este paquete es para que algunos titulos (como Tabla de Contenidos) esten en castellano
+\usepackage[spanish]{babel}
+
+%El siguiente paquete permite escribir la caratula facilmente
+\usepackage{caratula}
+
+\usepackage{aed2-symb,aed2-itef,aed2-tad,aed2-tokenizer,modulos_diseno, ./algorithms/clrscode3e}
+\usepackage{framed}
+\usepackage{amsmath}
+
+\usepackage{graphicx}
+
+%Datos para la caratula
+\materia{Sistemas Operativos}
+
+\titulo{Trabajo Pr\'actico 2 - Scrable}
+
+
+\integrante{Ortiz de Zarate, Juan Manuel}{403/10}{jmanuoz@gmail.com}
+\integrante{Kujawski, Kevin}{459/10}{kevinkuja@gmail.com}
+\integrante{Carreiro, Martin}{45/10}{carreiromartin@gmail.com}
+
+\begin{document}
+%numero de grupo
+%{\hfill\Huge 10}
+%esto construye la caractula
+\maketitle 
+
+ 
+ \tableofcontents
+
+ \newpage
+
+\input{ej1.tex}
+  \newpage
+\input{ej2.tex}
+
+
+\end{document}

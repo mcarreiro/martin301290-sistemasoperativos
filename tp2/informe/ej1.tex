@@ -1,35 +1,40 @@
-Para implementar una librería Read_Write Lock libre de inanición, utilizamos semáforos POSIX mediante la librería de C semaphore.h. La librería creada por nosotros consta de los mismo metódos que la clase RWLock birndada por la cátedra. Disponemos de 4 atributos privados: readersQuantity (contador de lectores, inicializado en 0), mutexReaders (para implementar la sección crítica a la hora de tocar el atributo readersQuantity), writers (Semáforo para saber si hay un escritor esperando, inicializado en 1) y freeResource (para saber si el recurso esta disponible, inicializado en 1).
+\section{Ejericio 1}
+\subsection{Librería RWLock sin inanición}
+Para implementar una librer\'ia Read Write Lock libre de inanici\'on, utilizamos semáforos POSIX mediante la librería de C semaphore.h. La librería creada por nosotros consta de los mismo metódos que la clase RWLock birndada por la cátedra. Disponemos de 4 atributos privados: readersQuantity (contador de lectores, inicializado en 0), mutexReaders (para implementar la sección crítica a la hora de tocar el atributo readersQuantity), writers (Semáforo para saber si hay un escritor esperando, inicializado en 1) y freeResource (para saber si el recurso esta disponible, inicializado en 1).\\
+\\
+A continuación el pseudocodigo de la nueva libreria RWSemaphoreLock:\\
+\\
+\subsection{Pseudoc\'odigo}
 
-A continuación el pseudocodigo de la nueva libreria RWSemaphoreLock:
-
+\begin{codebox}
 WLOCK
-//espero que no haya ningún escritor
-hayEscritores.wait()
-//espero que se libere el recurso y lo tomo
-recurso.wait()
+/**espero que no haya ningún escritor**/ \\
+hayEscritores.wait() \\
+/**espero que se libere el recurso y lo tomo**/ \\
+recurso.wait() \\
+\end{codebox}
+WUNLOCK\\
+-------		\\		
+	freeResource.signal()		// Libero el recurso	\\
+	writers.signal()		// Libero la exclusividad de los escritores\\
 
-WUNLOCK
--------				
-	freeResource.signal()		// Libero el recurso	
-	writers.signal()		// Libero la exclusividad de los escritores
-
-RLOCK
------
-	writers.wait()			// Espero que no haya escritores, para no "colarme" y evitar la inanición.
-	writers.post()			// Libero el semaforo para que los que vengan puedan seguir.
-	mutexReaders.wait()		// Tomo el mutex
-	readersQuantitiy++		// Incremento la cantidad de lectores
-	if(readersQuantity == 1)	// Si soy el primero... 
-		freeResource.wait()	// .. Tomo el recurso para los lectores
-	mutexReaders.signal()		// Libero el mutex
-
-RUNLOCK
-//espero el mutex para asegurarme el uso exclusivo sobre lectores
-mutexLectores.wai().
-//disminuyo la cantidad de lectores
-lectores--
-//si soy el ultimo lector que quedaba libero el recurso así puede tomarlo un escritor (en el caso que hubiese uno esperando)
-if(lectores == 0)
-	recurso.signal()
-//libero el mutex
-mutexLectores.signal()
+RLOCK\\
+-----\\
+	writers.wait()			// Espero que no haya escritores, para no "colarme" y evitar la inanición.\\
+	writers.post()			// Libero el semaforo para que los que vengan puedan seguir.\\
+	mutexReaders.wait()		// Tomo el mutex\\
+	readersQuantitiy++		// Incremento la cantidad de lectores\\
+	if(readersQuantity == 1)	// Si soy el primero... \\
+		freeResource.wait()	// .. Tomo el recurso para los lectores\\
+	mutexReaders.signal()		// Libero el mutex\\
+\\
+RUNLOCK\\
+//espero el mutex para asegurarme el uso exclusivo sobre lectores\\
+mutexLectores.wai().\\
+//disminuyo la cantidad de lectores\\
+lectores--\\
+//si soy el ultimo lector que quedaba libero el recurso así puede tomarlo un escritor (en el caso que hubiese uno esperando)\\
+if(lectores == 0)\\
+	recurso.signal()\\
+//libero el mutex\\
+mutexLectores.signal()\\
