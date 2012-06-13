@@ -57,6 +57,6 @@ Se puede observar que a medida que los ciclos del quantum aumentan, las tareas f
 \\
 Para este lote de tareas en particular, suele ser más eficiente asignarle una cantidad grande de ciclos por quantum,  ya que se realizarán menos bloqueos y menos cambios de contexto, pero no excesiva, porque, como se aprecia en las imágenes, a partir de 12 ciclos por quantum todos tardan lo mismo en finalizar y no mejora la eficiencia, esto es debido a que las tareas se bloquean en menor cantidad y en ningun caso utilizan más del quantum provisto. Por lo tanto, la mejor elección para el quantum es de 12 ciclos.
 \\
-Con un quantum de 12 ciclos en adeltante, se puede notar que lo que más influye en cada proceso son los bloqueos que se producen y no tanto el corte porque no le quedan más ciclos, produciendo cambios de contexto obligatorios y empeorando bastante la optimización del Round Robin frente a otros algoritmos de scheduling.
+Con un quantum de 12 ciclos en adelante, se puede notar que lo que más influye en cada proceso son los bloqueos que se producen y no tanto el corte porque no le quedan más ciclos del quantum, produciendo cambios de contexto obligatorios y empeorando bastante el tiempo total de finalización de las tareas, causando un desaprovechamiento de las ventajas del Round Robin frente a otros algoritmos de scheduling, ya que si algo caracteriza a este algoritmo, es de repartir de manera equitativa y racional los recursos, y en este caso se asemeja más a un algoritmo gobernado por bloqueos.
 
 
