@@ -6,9 +6,9 @@
  *
  */
 
-int mi_numero_muerte;			/* Our_Sequence_Number para cuando cierro el servidor */
+int mi_numero_muerte;	
 int numero_muerte_global;		/* Highest_Sequence_Number para cuando cierro el servidor */
-
+char str [45];
 void servidor(int mi_cliente)
 {
 	numero_muerte_global = 0;
@@ -47,7 +47,7 @@ void servidor(int mi_cliente)
 			i = 0;
 			while(i<cantRanks){
 				clock++;
-				if(i!=mi_cliente-1 && estadoServidores[i] == TRUE) //No me lo mando a mi mismo
+				if(i!=mi_cliente-1 && estadoServidores[i/2] == TRUE) //No me lo mando a mi mismo y se lo mande alguien que este vivo
 					MPI_Send(&clock, 1, MPI_INT, i, TAG_REQUEST, COMM_WORLD);				
 				i+=2;
 			}
@@ -110,60 +110,59 @@ void servidor(int mi_cliente)
 				listo_para_salir = TRUE;
 				assert(hay_pedido_local == FALSE);
 				
-				/* Aviso a todos los servidores activos que me voy */
-				/* Es el mismo algoritmo de que para los REQUEST */
-				
-				
+				//Les digo a mis amigos que me quiero ir
 				i = 0;
 				while(i<cantRanks){
 					clock++;
-					if(i!=mi_cliente-1 && estadoServidores[i] == TRUE) 
+					if(i!=mi_cliente-1 && estadoServidores[i/2] == TRUE) 
 						MPI_Send(&clock, 1, MPI_INT, i, TAG_SERVER_DOWN, COMM_WORLD);				
 					i+=2;
 				}
-				
-				/* Ahora espero que los demas servidores me den el OK para poder irme */
-				/* De esta forma, si habia algun mensaje en el aire para mi cuando decido irme, lo voy a agarrar antes de salir ssh */
-				
+				cantReply = 0;
+				sprintf(str, "Le tengo que avisar a %d servidores que termine", (int)(servidores - 1));
+				debug(str);
+				//Espero que me dejen ir los muy garcas
 				while(cantReply != (servidores - 1)){
-									
+					debug("estoy esperando que me dejen terminar");				
 					MPI_Recv(&buffer, 1, MPI_INT, ANY_SOURCE, ANY_TAG, COMM_WORLD, &status);
 					origen = status.MPI_SOURCE;
 					tag = status.MPI_TAG;
 					
-					switch(tag)
-					{
+					switch(tag){
 						case(TAG_GOAWAY):
 						{
-							cantReply++;	/* Si me dice que me puedo ir, soy feliz */
+							//se copo
+							cantReply++;
 							break;
 						}
 						
 						case(TAG_REQUEST):
 						{
-							/* Si me llega algun REQUEST mientras me quiero ir, le doy el OK sin problemas */
-							
+							//Me pide algo y le digo de una q si, total me quiero ir far far away
 							MPI_Send(NULL, 0, MPI_INT, origen, TAG_REPLY, COMM_WORLD);						
 							break;
 						}
 						
 						case(TAG_SERVER_DOWN):
 						{
-							if(clock < mi_numero_muerte)
+							//Llega otro flaco que tambien quiere irse, vamos a ver quien es mas importante!
+							if(buffer < mi_numero_muerte)
 							{
 								MPI_Send(NULL, 0, MPI_INT, origen, TAG_GOAWAY, COMM_WORLD);
 								estadoServidores[origen / 2] = FALSE;
 							}	
 							else
 							{
-								if(buffer<clock){
-									MPI_Send(&clock, 1, MPI_INT, origenServidor, TAG_GOAWAY, COMM_WORLD);											
-								} else if(buffer>clock) {
-									clock = buffer + 1;	
-									replyPendientes[origenServidor/2] = TRUE;											
-								}else{
-									if(origen < mi_rank) MPI_Send(NULL, 0, MPI_INT, origen, TAG_GOAWAY, COMM_WORLD);	/* Le doy el OK */
-											else replyPendientes[origenServidor/2] = TRUE;
+								if(buffer > mi_numero_muerte){
+									replyPendientes[origen / 2] = TRUE;
+									numero_muerte_global = buffer;
+								}
+								else{
+									if(origen < mi_rank){
+										MPI_Send(NULL, 0, MPI_INT, origen, TAG_GOAWAY, COMM_WORLD);
+										estadoServidores[origen / 2] = FALSE;
+									}
+									else replyPendientes[origen / 2] = TRUE;
 								}	
 							}						
 
@@ -171,17 +170,14 @@ void servidor(int mi_cliente)
 						}
 					}
 				}
-				
-				/* Ya tengo todas mis respuestas para poder morir tranquilo */
-				
-				/* Como ultima voluntad, le envio todos los PODES_IRTE que tengo pendientes */
-				
+				debug("ya les avise");
+				//ya me puedo ir, pero como soy buena onda les aviso a los demas que tambien pueden irse
 				for(i = 0; i < cant_ranks / 2; i++)
 				{
 					if(replyPendientes[i] == TRUE)
 					{
-						assert(i * 2 != mi_rank);					/* Por si me mande un moco, yo mismo no deberia tener TRUE */
-						assert(estadoServidores[i] == TRUE);		/* Si le debo una respuesta, el servidor deberia estar esperandola */
+						assert(i * 2 != mi_rank);			
+						assert(estadoServidores[i] == TRUE);	
 						
 						MPI_Send(NULL, 0, MPI_INT, origen, TAG_GOAWAY, COMM_WORLD);
 					}
@@ -201,7 +197,7 @@ void servidor(int mi_cliente)
 			servidores--;
 			estadoServidores[origen/2] = FALSE;
 			MPI_Send(NULL, 0, MPI_INT, origen, TAG_GOAWAY, COMM_WORLD);			
-			if(clock > numero_muerte_global) numero_muerte_global = clock;
+			if(buffer > numero_muerte_global) numero_muerte_global = buffer;
 		}
 
 	}
