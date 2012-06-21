@@ -6,8 +6,12 @@
  *
  */
 
+int mi_numero_muerte;			/* Our_Sequence_Number para cuando cierro el servidor */
+int numero_muerte_global;		/* Highest_Sequence_Number para cuando cierro el servidor */
+
 void servidor(int mi_cliente)
 {
+	numero_muerte_global = 0;
 	int clock = 0;
 	int cantRanks = cant_ranks;
 	int cantReply = 0;
@@ -17,10 +21,14 @@ void servidor(int mi_cliente)
 	int buffer, count = 1;
 	int replyPendientes[cantRanks/2];
 	int i = 0;
+	int servidores = cant_ranks / 2;
+	int estadoServidores[cantRanks/2];
 	while(i<cantRanks/2){
 		replyPendientes[i] = FALSE;	
 		i++;
 	}
+	for(i = 0; i < cant_ranks / 2; i++) estadoServidores[i] = TRUE;
+	
 	while( ! listo_para_salir ) {
 
 		MPI_Recv(&buffer, count, MPI_INT, ANY_SOURCE, ANY_TAG, COMM_WORLD, &status);
@@ -48,15 +56,25 @@ void servidor(int mi_cliente)
 							debug("ME LLEGO REQUEST DE" + origenServidor);
 							if(buffer<clock){
 								MPI_Send(&clock, 1, MPI_INT, origenServidor, TAG_REPLY, COMM_WORLD);											
-							} else {
+							} else if(buffer>clock) {
 								clock = buffer + 1;	
 								replyPendientes[origenServidor/2] = TRUE;											
+							}else{
+								if(origen < mi_rank) MPI_Send(NULL, 0, MPI_INT, origen, TAG_REPLY, COMM_WORLD);	/* Le doy el OK */
+										else replyPendientes[origenServidor/2] = TRUE;
 							}
 							break;
 					case TAG_REPLY: debug("ME LLEGO REPLY DE" + origenServidor); cantReply++;
 							break;
 					case TAG_SERVER_DOWN:
-							//MATAR A TODOS 
+
+							servidores--;
+							estadoServidores[origen/2] = FALSE;
+							MPI_Send(NULL, 0, MPI_INT, origen, TAG_GOAWAY, COMM_WORLD);
+								
+							if(clock > numero_muerte_global) numero_muerte_global = clock;
+																							
+							
 							break;			
 				}
 
