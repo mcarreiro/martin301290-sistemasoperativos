@@ -188,9 +188,20 @@ void servidor(int mi_cliente)
 				}	
 		}
 		else if(tag == TAG_REQUEST){
-			debug("ME LLEGO UN PUTO REQUEST SOLO");
-			clock++;
-			MPI_Send(&clock, 1, MPI_INT, origen, TAG_REPLY, COMM_WORLD);												
+			if(!hay_pedido_local){
+				debug("LLEGO UN REQUEST QUE ACEPTO Y CONTESTO CON REPLY");
+				clock++;
+				MPI_Send(NULL, 0, MPI_INT, origen, TAG_REPLY, COMM_WORLD);
+			}else{
+				debug("MI CLIENTE NO LIBERO TODAVIA, WAIT");
+				replyPendientes[origen/2] = TRUE;	
+			}									
+		}
+		else if(tag == TAG_SERVER_DOWN){
+			servidores--;
+			estadoServidores[origen/2] = FALSE;
+			MPI_Send(NULL, 0, MPI_INT, origen, TAG_GOAWAY, COMM_WORLD);			
+			if(clock > numero_muerte_global) numero_muerte_global = clock;
 		}
 
 	}
