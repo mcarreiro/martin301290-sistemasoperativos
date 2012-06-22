@@ -6,12 +6,11 @@
  *
  */
 
-int mi_numero_muerte;	
-int numero_muerte_global;		
-char str [45];
+		
+
 void servidor(int mi_cliente)
 {
-	numero_muerte_global = 0;
+
 	int clock = 0;
 	int cantRanks = cant_ranks;
 	int cantReply = 0;
@@ -24,9 +23,9 @@ void servidor(int mi_cliente)
 	int i = 0;
 	int servidores = cant_ranks / 2;
 	int estadoServidores[cantRanks/2];
-	numero_muerte_global = 0;
-	int Highest_Sequence_Number = 0;
 
+	int Highest_Sequence_Number = 0;
+	char str [100];
 	int cantRespuestas = 0;
 	
 	while(i<cantRanks/2){
@@ -81,7 +80,7 @@ void servidor(int mi_cliente)
 							servidores--;											
 							estadoServidores[origenServidor/2] = FALSE;
 							MPI_Send(NULL, 0, MPI_INT, origenServidor, TAG_GOAWAY, COMM_WORLD);
-							if(buffer > numero_muerte_global) numero_muerte_global = buffer;
+
 							break;			
 				}
 
@@ -114,10 +113,10 @@ void servidor(int mi_cliente)
 				
 				//Les digo a mis amigos que me quiero ir
 				i = 0;
-				mi_numero_muerte = numero_muerte_global + 1;
+
 				while(i<cantRanks){					
 					if(i!=mi_cliente-1 && estadoServidores[i/2] == TRUE) 
-						MPI_Send(&mi_numero_muerte, 1, MPI_INT, i, TAG_SERVER_DOWN, COMM_WORLD);				
+						MPI_Send(&clock, 1, MPI_INT, i, TAG_SERVER_DOWN, COMM_WORLD);				
 					i+=2;
 				}
 				cantReply = 0;
@@ -149,15 +148,15 @@ void servidor(int mi_cliente)
 						case(TAG_SERVER_DOWN):
 						{
 							//Llega otro flaco que tambien quiere irse, vamos a ver quien es mas importante!
-							if(buffer < mi_numero_muerte){									
+							if(buffer < clock){									
 								MPI_Send(NULL, 0, MPI_INT, origen, TAG_GOAWAY, COMM_WORLD);
 								estadoServidores[origen / 2] = FALSE;
 							}	
 							else
 							{
-								if(buffer > mi_numero_muerte){
+								if(buffer > clock){
 									goAwayPendientes[origen / 2] = TRUE;
-									numero_muerte_global = buffer;
+
 								}
 								else{
 									if(origen < mi_rank){										
@@ -201,7 +200,7 @@ void servidor(int mi_cliente)
 			servidores--;
 			estadoServidores[origen/2] = FALSE;
 			MPI_Send(NULL, 0, MPI_INT, origen, TAG_GOAWAY, COMM_WORLD);						
-			if(buffer > numero_muerte_global) numero_muerte_global = buffer;
+
 		}
 	}
 
