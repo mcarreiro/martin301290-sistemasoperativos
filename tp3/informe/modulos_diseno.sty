@@ -1,0 +1,369 @@
+\ProvidesPackage{modulos_diseno}
+
+\RequirePackage{ifthen}
+\RequirePackage[spanish]{babel}
+\RequirePackage[utf8]{inputenc}
+\RequirePackage{aed2-tokenizer}
+\RequirePackage{amsmath}
+\RequirePackage{amsfonts}
+
+\newlength{\margdFuncion}\setlength{\margdFuncion}{1cm}
+\newlength{\margServExp}\setlength{\margServExp}{2.3cm}
+\newlength{\margiFuncion}\setlength{\margiFuncion}{1cm}
+\newlength{\margTitulo}\setlength{\margTitulo}{1.5cm}
+\newlength{\margEstr}\setlength{\margEstr}{1cm}
+\newlength{\margRepComment}\setlength{\margRepComment}{0.5cm}
+
+%Palabras claves
+\newcommand{\din}{\textbf{in}}
+\newcommand{\dout}{\textbf{out}}
+\newcommand{\dinout}{\bf{inout}}
+\newcommand{\complexO}{\mathcal{O}}
+\newcommand{\True}{\textsl{True}}
+\newcommand{\chap}[1]{$\widehat{#1}$}
+\newcommand{\mx}{$\times\ $}
+
+\newcommand{\debug}[1]{\scriptsize{#1}\normalsize}
+
+\newenvironment{modulo}[1]{
+\section{M\'odulo #1}
+}{
+\par
+\vspace{0.60cm}
+\setlength{\hangindent}{2cm}
+\large\textbf{Fin M\'odulo}
+}
+
+\newenvironment{interfaz}[1][]{
+\vspace{0.5cm}
+\hspace{\margTitulo}
+\subsection{Interfaz}
+}{
+}
+
+\newenvironment{serviciosU}[1][]{
+\vspace{0.5cm}
+\hspace{\margTitulo}
+\subsection{Servicios Usados}
+}{
+}
+
+\newenvironment{serviciosE}[1][]{
+\vspace{0.5cm}
+\hspace{\margTitulo}
+\subsection{Servicios Exportados}
+}{
+}
+
+\newenvironment{estr}[1][]{
+\vspace{0.5cm}
+\hspace{\margTitulo}
+\subsection{Representaci\'on}
+}{
+}
+
+\newenvironment{repabs}[1][]{
+\vspace{0.5cm}
+\hspace{\margTitulo}
+\subsection{Invariante de Representaci\'on y funci\'on de Abstracci\'on}
+}{
+}
+
+\newenvironment{algoritmos}[1][]{
+\vspace{0.5cm}
+\hspace{\margTitulo}
+\subsection{Algoritmos}
+}{
+}
+
+\newenvironment{estructura}[1][]{
+\vspace{0.5cm}
+\hspace{\margTitulo}\textbf{Estructura}
+}{
+}
+
+\newcommand{\aclaracion}[1]{
+\par
+\vspace{0.06cm}\hspace{\margdFuncion\footnotesize{\emph{\textbf{Aclaración: }}#1}}\\
+}
+
+\newcommand{\comentario}[1]{
+\par
+\vspace{0.10cm}\hspace{\margdFuncion}\footnotesize{\emph{\textbf{Comentario: }}#1}
+}
+
+\newcommand{\justificacion}[1]{
+\vspace{0.10cm}
+\fbox{%
+   \parbox{\textwidth-\margdFuncion-1cm}{\footnotesize{\emph{\textbf{Justificación: }}#1}}
+}
+}
+
+
+
+
+
+
+\newcommand{\nota}[1]{
+\vspace{0.10cm}\hspace{\margdFuncion}\footnotesize{\emph{\textbf{Servicios usados: }}#1}
+}
+
+
+
+%\verPasaje{<source>} busca el formato de pasaje (in out inout) del primer parámetro del <source> (hasta la ,)
+%reemplazandolo por la versión negrita. Deja en @PreProcesado lo siguiente al in|out|inout y anterior a la ,
+\newcommand{\verPasaje}[1]{
+  %\edef\@SinProcesar{#1}%
+  \edef\@Cola{}%
+  \edef\@Param{}%
+  \GetTokens[;]{@Param}{@Cola}{#1}%
+  \SH@CheckTokenSep{in}{\@Param}%
+  \ifx\SH@TokenValid\SH@true% 
+      \din %agrego \din si hay un in
+      \GetTokens[in]{@TempA}{@TempB}{\@Param}%
+      \let\@Param=\@TempB%
+  \fi%
+  \SH@CheckTokenSep{out}{\@Param}% 
+  \ifx\SH@TokenValid\SH@true% 
+      \dout %agrego \dout si hay un out
+      \GetTokens[out]{@TempA}{@TempB}{\@Param}%
+      \let\@Param=\@TempB%
+  \fi%
+  \SH@DefineCommand{@PreProcesado}{\@Param}%
+}
+
+%proceso parametros de funcion
+\newcommand{\paramsFuncion}[1]{%
+    \edef\@SinProcesar{#1}%
+    \edef\@Cola{}%
+    %\edef\@Temp1{}
+    %\edef\@Temp2{}
+    \whiledo{\not\equal{\@SinProcesar}{}}{%
+	\verPasaje{\@SinProcesar}%agrego din, dout y dinout si aparecen}
+        \GetTokens[:]{@Valor}{@Tipo}{\@PreProcesado}%
+        %
+        \@Valor : \text{\@Tipo}%
+        %\ifthen{\not\equal{\@Valor}{}}{\ \textsf{\@Valor}}%
+        \ifthen{\not\equal{\@Cola}{}}{,}%
+        \let\@SinProcesar=\@Cola%
+    }%
+}
+
+%proceso elementos de una estructura, por cada X pone un \mx y agrega la identación correspondiente
+%considerando que se encuentra en un environment 'tabbing'
+\newcommand{\elemEstr}[1]{%
+    \edef\@SinProcesar{#1}%
+    \edef\@Cola{}
+    \=
+    \whiledo{\not\equal{\@SinProcesar}{}}{%
+	\GetTokens[;]{@Param}{@Cola}{\SinProcesar}%
+        \GetTokens[:]{@Valor}{@Tipo}{\@Param}%
+        %
+        \> \@Valor : \textsf{\@Tipo}\\%
+        %\ifthen{\not\equal{\@Valor}{}}{\ \textsf{\@Valor}}%
+        \ifthen{\not\equal{\@Cola}{}}{\mx}%
+        \let\@SinProcesar=\@Cola%
+    }%
+}
+
+
+%dFuncion(Nombre función, parámetros, resultado, complejidad, pre y post)
+%complejidad tiene modo matemático por default. Los parámetros se separan por ;
+\newcommand{\dFuncion}[8]{
+%\setlength{\hangindent}{\margdFuncion}
+\par
+\vspace{0.10cm}
+\hspace{\margdFuncion}
+\parbox{\textwidth-\margdFuncion-1cm}{
+  \begin{flushleft}
+  \textsc{#1}(\ifthen{\not\equal{#2}{}}{\paramsFuncion{#2}})%
+  \ifthen{\not\equal{#3}{}}{ $\quad\longrightarrow\quad$\paramsFuncion{#3}}
+  \\$\qquad \complexO(#4)$\\
+  \textbf{Pre:\space}\space\{#5\} \\
+  \textbf{Post:}\space\{#6\} \\
+  \ifthenelse{\not\equal{#7}{}}{\footnotesize{\textbf{Descripcion:\ }#7\\}}{}
+  \ifthenelse{\not\equal{#8}{}}{\footnotesize{\textbf{Alias:\ }#8\\}}{}
+  \end{flushleft}
+}
+}
+% 
+% %este es el comando para insertar servicios exportados luego de una función
+% \newcommand{\servExport}[1]{
+% \begin{center}
+% \vspace{-0.3cm}
+% \hspace{\margdFuncion}
+% \mbox{%
+%    \parbox{\textwidth-\margdFuncion-1cm}{\footnotesize{\textbf{\ Servicios Exportados: }#1}}
+% }
+% \end{center}
+% }
+% 
+% \newcommand{\servUsados}[1]{
+% 
+% \begin{center}
+% \vspace{-0.3cm}
+% \hspace{\margdFuncion}
+% \mbox{%
+%    \parbox{\textwidth-\margdFuncion-1cm}{\footnotesize{\textbf{\ Servicios Usados: }#1}}
+% }
+% \end{center}
+% }
+
+
+%defEstr(Nombre tad, nombre estructura, descripcion)
+%Sirve para definir una estructura, descripcion se encuentra dentro de un envirnoment tabbing
+\newcommand{\defEstr}[3]{
+\par
+\hspace{\margEstr}
+\parbox{\textwidth-\margEstr}{
+\begin{tabbing}
+#1 \textbf{se representa con } \textsf{#2} \\
+\emph{donde} \\ %
+\textsf{#2} es #3
+\end{tabbing}
+}
+}
+
+\newcommand{\donde}[2]{
+\vspace{-2em}
+\par
+\hspace{\margEstr}
+\parbox{\textwidth-\margEstr}{
+\begin{tabbing}
+\emph{donde} \\ %
+\textsf{#1} es #2
+\end{tabbing}
+}
+}
+
+\newcommand{\cond}{\item}
+
+%rep(estr) Arma el inicio de la declaración del Rep. Las condiciones del abs se declaran con \cond
+\newcommand{\rep}[2]{
+\par
+\renewcommand{\labelitemi}{}
+\renewcommand{\labelitemii}{}
+\hspace*{\margEstr}
+\parbox{\textwidth - \margEstr-2cm}{
+\begin{flushleft}
+\noindent Rep : #1 $\rightarrow$ \emph{Boolean}\\
+\ $(\forall e : #1)$
+\begin{itemize}
+#2
+\end{itemize}
+\end{flushleft}
+}
+}
+
+%abs(estr, inst_tad, tad, definición) Arma el inicio de la declaración del Abs. Las condiciones del abs se declaran con \cond
+%inst_tad es el nombre que recibe la instancia del tad a comparar
+\newcommand{\abs}[4]{
+\par
+\renewcommand{\labelitemi}{}
+\renewcommand{\labelitemii}{}
+\hspace*{\margEstr}
+\parbox{\textwidth-\margEstr-2cm}{
+\begin{flushedleft}
+\noindent Abs : \chap{#1} e $\rightarrow$ \emph{#3} \hspace{4cm} \{Rep(e)\} \\
+Abs(e) = #2 : #3 / 
+\begin{itemize}
+#4
+\end{itemize}
+\end{flushedleft}
+}
+\par
+}
+
+%ambiente de implementación
+\newenvironment{implementacion}[1][]{
+\hspace{\margTitulo}\textbf{Implementaci\'on}
+}{
+}
+
+%iFuncion(Nombre función, parámetros, resultado, complejidad, pre y post)
+%complejidad tiene modo matemático por default. Los parámetros se separan por ;
+\newcommand{\iFuncion}[5]{
+%\setlength{\hangindent}{\margdFuncion}
+\par
+\vspace{0.30cm}
+\hspace{\margiFuncion}
+\parbox{\textwidth-\margiFuncion}{
+  \begin{flushleft}
+  \emph{#1}\ifthen{\not\equal{#2}{}}{(\paramsFuncion{#2})}
+  \ifthen{\not\equal{#3}{}}{$\rightarrow$ \paramsFuncion{#3}}
+  $\quad \complexO(#4)$ \\
+  %\vspace{-0.5cm}
+  #5
+  \end{flushleft}
+}
+}
+
+%Usado para definir pre y post de una iFuncion
+\newcommand{\defCond}[1]{
+%\hspace{\margiFuncion}
+\{#1\} \\
+}
+
+%Para definir una complejidad, hace O(param) en modo matemático
+\newcommand{\defComplex}[1] {
+$\complexO\left(#1\right)$
+}
+
+\newcommand{\Oh}[1] {
+\complexO\left(#1\right)
+}
+
+%Para definir comentarios durante el rep
+\newcommand{\repComment}[1]{
+\\\hspace*{\margRepComment}\small{\em#1}\normalsize
+}
+
+%idem repComment
+\newcommand{\absComment}[1]{
+\repComment{#1}
+}
+
+%wrapper para otras operaciones
+\newcommand{\nuevasOperaciones}[1]{
+\hspace{\margEstr}
+\parbox{\textwidth-\margEstr}{
+#1
+}
+}
+
+%wrapper para tad
+%defTad(<definición>)
+\newcommand{\defTad}[1]{
+\hspace{\margTitulo}\parbox{\textwidth-\margTitulo}{
+\begin{tad}{}
+ #1
+\end{tad}
+}
+}
+
+%este es el comando para hablar luego de una iFunción
+\newcommand{\notasIFuncion}[1]{
+\begin{center}
+\vspace{-0.25cm}
+\footnotesize{\em#1} 
+\end{center}
+}
+
+%este commando permite definir el 'se explica con' y los 'generos' en una sola líneas
+%defInterfaz(se explica con, géneros)
+\newcommand{\defInterfaz}[2]{
+\vspace{0.25cm}
+\par
+\hspace{\margTitulo}\hspace{0.5cm}\parbox{\margTitulo}{\textwidth-\margTitulo}{
+\begin{tabular}{l l}
+\textbf{Se explica con:} #1 & \textbf{G\'eneros:} #2\\
+\end{tabular}
+\par
+\vspace{0.25cm}
+\hspace{\margTitulo}\hspace{0.25cm}\textbf{Operaciones:}
+}
+}
+
+%este commando permite poner el tipo paramétrico con \langle <tipo> \rangle
+\newcommand{\dt}[1]{
+$\langle$#1$\rangle$}
