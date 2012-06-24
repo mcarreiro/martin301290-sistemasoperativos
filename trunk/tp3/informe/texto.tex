@@ -6,7 +6,7 @@ El algoritmo para realizar esta sincronización es una implentación del algorit
 
 \section{Solución}
 
-Para realizar dicha tarea agregaoms los handlers necesarios para cumplir con el protocolo servidor-cliente y entre servidores.
+Para realizar dicha tarea agregamos los handlers necesarios para cumplir con el protocolo servidor-cliente y entre servidores.
 A su vez, tal como describe el paper, para mantener la sincronización y evitar que siempre un servidor tenga prioridad sobre los otros, agregamos
 un número de secuencia para desempatar en caso de pedidos simultáneos.\\
 La correcta implementación del algoritmo nos garantiza una solución libre de deadlock, livelock,
