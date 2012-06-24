@@ -1,0 +1,15 @@
+\section{Enunciado}
+
+El problema consistía en modificar el servidor dado por la cátedra, de forma tal que varios servidores puedan proveer un recurso compartido a sus clientes
+sin deadlock, inanición, livelock.\\
+El algoritmo para realizar esta sincronización es una implentación del algoritmo de Ricart y Agrawala.
+
+\section{Solución}
+
+Para realizar dicha tarea agregaoms los handlers necesarios para cumplir con el protocolo servidor-cliente y entre servidores.
+A su vez, tal como describe el paper, para mantener la sincronización y evitar que siempre un servidor tenga prioridad sobre los otros, agregamos
+un número de secuencia para desempatar en caso de pedidos simultáneos.\\
+La correcta implementación del algoritmo nos garantiza una solución libre de deadlock, livelock,
+inanición o violación de la exclusión mutua.
+
+\section{Tests}
